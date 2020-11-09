@@ -1,0 +1,12 @@
+html,
+body {
+  margin: 0;
+}
+
+#app {
+  display: flex;
+}
+
+.buttons {
+  padding: 2em;
+}

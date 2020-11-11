@@ -1,5 +1,5 @@
 const { GameOfLife } = window.GameOfLife;
-const game = new GameOfLife({ rows: 3, columns: 3 });
+const game = new GameOfLife({ rows: 100, columns: 100 });
 const seed = [
   {
     row: 1,

@@ -23,6 +23,7 @@ export class GameOfLife {
   }
 
   public toggleCellAlive(selection: Selection): void {
+    const newGrid = copyWithoutReference(this.grid);
     const index = this._selectionToIndex(selection);
     const cell = copyWithoutReference(this.grid.cells[index]);
 
@@ -36,7 +37,8 @@ export class GameOfLife {
       this.alivePopulation[index] = cell;
     }
 
-    this.grid.cells[index] = cell;
+    newGrid.cells[index] = cell;
+    this.grid = newGrid;
   }
 
   public reset(): void {

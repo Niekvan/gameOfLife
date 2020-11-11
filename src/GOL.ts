@@ -24,10 +24,11 @@ export class GameOfLife {
 
   public setCellActive(data: Selection): void {
     const { row, column } = data;
-    const index = column - 1 + (row - 1) * this.columns;
+    const index = column + row * this.columns;
     const cell = copyWithoutReference(this.grid.cells[index]);
     cell.alive = true;
     this.grid.cells[index] = cell;
+    this.alivePopulation[index] = cell;
   }
 
   public reset(): void {

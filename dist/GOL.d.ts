@@ -8,11 +8,16 @@ export declare class GameOfLife {
     constructor(data: InitialData);
     get state(): Grid;
     get frameCount(): number;
-    setCellActive(data: Selection): void;
+    toggleCellAlive(selection: Selection): void;
     reset(): void;
     randomise(): void;
-    resize(rows: number, columns: number): void;
+    seed(seed: Selection[]): void;
+    resize(data: {
+        rows: number;
+        columns: number;
+    }): void;
     sequence(): void;
     private _createGrid;
     private _getNeighbours;
+    private _selectionToIndex;
 }

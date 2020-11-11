@@ -1,6 +1,21 @@
 const { GameOfLife } = window.GameOfLife;
-const game = new GameOfLife({ rows: 100, columns: 100 });
-game.randomise();
+const game = new GameOfLife({ rows: 3, columns: 3 });
+const seed = [
+  {
+    row: 1,
+    column: 0,
+  },
+  {
+    row: 1,
+    column: 1,
+  },
+  {
+    row: 1,
+    column: 2,
+  },
+];
+game.seed(seed);
+game.sequence();
 
 const startButton = document.querySelector('#start');
 const stopButton = document.querySelector('#stop');
@@ -17,7 +32,7 @@ canvas.height = size;
 const cellSize = Math.floor(size / game.state.columns);
 
 const fillCanvas = (cells) => {
-  for (cell of cells) {
+  for (const cell of cells) {
     const color = cell.alive ? '#FF7586' : '#181818';
     ctx.fillStyle = color;
     ctx.fillRect(

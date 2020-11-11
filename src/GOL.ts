@@ -22,13 +22,21 @@ export class GameOfLife {
     return this.frame;
   }
 
-  public setCellActive(data: Selection): void {
-    const { row, column } = data;
-    const index = column + row * this.columns;
+  public toggleCellAlive(selection: Selection): void {
+    const index = this._selectionToIndex(selection);
     const cell = copyWithoutReference(this.grid.cells[index]);
-    cell.alive = true;
+
+    const alive = cell.alive;
+
+    cell.alive = !alive;
+
+    if (alive) {
+      delete this.alivePopulation[index];
+    } else {
+      this.alivePopulation[index] = cell;
+    }
+
     this.grid.cells[index] = cell;
-    this.alivePopulation[index] = cell;
   }
 
   public reset(): void {
@@ -48,16 +56,32 @@ export class GameOfLife {
         const newCell = copyWithoutReference(cell);
         newCell.alive = alive;
         newGrid.cells[i] = newCell;
-        aliveCells[newCell.index] = newCell;
+        aliveCells[i] = newCell;
       }
     }
     this.grid = newGrid;
     this.alivePopulation = aliveCells;
   }
 
-  public resize(rows: number, columns: number): void {
-    this.rows = rows;
-    this.columns = columns;
+  public seed(seed: Selection[]): void {
+    const grid = this._createGrid(this.rows, this.columns);
+    const aliveCells: AliveMap = {};
+
+    for (const selectedCell of seed) {
+      const index = this._selectionToIndex(selectedCell);
+      const cell = copyWithoutReference(grid.cells[index]);
+      cell.alive = true;
+      aliveCells[index] = cell;
+      grid.cells[index] = cell;
+    }
+
+    this.grid = grid;
+    this.alivePopulation = aliveCells;
+  }
+
+  public resize(data: { rows: number; columns: number }): void {
+    this.rows = data.rows;
+    this.columns = data.columns;
     this.reset();
   }
 
@@ -65,9 +89,9 @@ export class GameOfLife {
     const newGrid = this._createGrid(this.rows, this.columns);
 
     const aliveKeys: number[] = Object.keys(this.alivePopulation).map(Number);
-    const aliveNodes: AliveMap = {};
+    const aliveCells: AliveMap = {};
 
-    for (let i = aliveKeys.length - 1; i > 0; i--) {
+    for (let i = aliveKeys.length - 1; i >= 0; i--) {
       const key = aliveKeys[i];
       const cell = this.alivePopulation[key];
       const neighbours = this._getNeighbours(cell, newGrid);
@@ -78,18 +102,18 @@ export class GameOfLife {
         switch (neighbour.aliveNeighbours) {
           case 3:
             neighbour.alive = true;
-            aliveNodes[neighbour.index] = neighbour;
+            aliveCells[neighbour.index] = neighbour;
             break;
           case 2:
             const alive = neighbour.index in this.alivePopulation;
             if (alive) {
               neighbour.alive = alive;
-              aliveNodes[neighbour.index] = neighbour;
+              aliveCells[neighbour.index] = neighbour;
             }
             break;
           default:
             neighbour.alive = false;
-            delete aliveNodes[neighbour.index];
+            delete aliveCells[neighbour.index];
             break;
         }
         newGrid.cells[neighbour.index] = neighbour;
@@ -97,7 +121,7 @@ export class GameOfLife {
     }
     this.frame++;
     this.grid = newGrid;
-    this.alivePopulation = aliveNodes;
+    this.alivePopulation = aliveCells;
   }
 
   private _createGrid(rows: number, columns: number): Grid {
@@ -123,23 +147,54 @@ export class GameOfLife {
   }
 
   private _getNeighbours(cell: Cell, grid: Grid): Cell[] {
-    const leftNeighbour = grid.cells[cell.index - 1];
-    const leftTopNeighbour = grid.cells[cell.index - grid.columns - 1];
-    const leftBottomNeighbour = grid.cells[cell.index + grid.columns - 1];
-    const topNeighbour = grid.cells[cell.index - grid.columns];
-    const bottomNeighbour = grid.cells[cell.index + grid.columns];
-    const rightNeighbour = grid.cells[cell.index + 1];
-    const rightTopNeighbour = grid.cells[cell.index - grid.columns + 1];
-    const rightBottomNeighbour = grid.cells[cell.index + grid.columns + 1];
+    const leftTopNeighbour =
+      grid.cells[cell.index - grid.columns - 1]?.row === cell.row - 1
+        ? grid.cells[cell.index - grid.columns - 1]
+        : undefined;
+    const topNeighbour =
+      grid.cells[cell.index - grid.columns]?.row === cell.row - 1
+        ? grid.cells[cell.index - grid.columns]
+        : undefined;
+    const rightTopNeighbour =
+      grid.cells[cell.index - grid.columns + 1]?.row === cell.row - 1
+        ? grid.cells[cell.index - grid.columns + 1]
+        : undefined;
+
+    const leftNeighbour =
+      grid.cells[cell.index - 1]?.row === cell.row
+        ? grid.cells[cell.index - 1]
+        : undefined;
+    const rightNeighbour =
+      grid.cells[cell.index + 1]?.row === cell.row
+        ? grid.cells[cell.index + 1]
+        : undefined;
+
+    const leftBottomNeighbour =
+      grid.cells[cell.index + grid.columns - 1]?.row === cell.row + 1
+        ? grid.cells[cell.index + grid.columns - 1]
+        : undefined;
+    const bottomNeighbour =
+      grid.cells[cell.index + grid.columns]?.row === cell.row + 1
+        ? grid.cells[cell.index + grid.columns]
+        : undefined;
+    const rightBottomNeighbour =
+      grid.cells[cell.index + grid.columns + 1]?.row === cell.row + 1
+        ? grid.cells[cell.index + grid.columns + 1]
+        : undefined;
+
     return [
-      leftNeighbour,
       leftTopNeighbour,
-      leftBottomNeighbour,
       topNeighbour,
-      bottomNeighbour,
-      rightNeighbour,
       rightTopNeighbour,
+      leftNeighbour,
+      rightNeighbour,
+      leftBottomNeighbour,
+      bottomNeighbour,
       rightBottomNeighbour,
-    ].filter((cell) => cell);
+    ].filter((cell) => cell) as Cell[];
+  }
+
+  private _selectionToIndex(selection: Selection): number {
+    return selection.column + selection.row * this.columns;
   }
 }

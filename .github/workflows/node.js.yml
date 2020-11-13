@@ -29,9 +29,8 @@ jobs:
     - run: yarn build
     - name: Test code
       run: yarn test
-    - name: Upload code coverage
+    - name: Codecov
       uses: codecov/codecov-action@v1.0.14
       with: 
-        files: ./clover.xml, ./coverage-final.json
-        directory: ./coverage/
+        files: ./coverage/clover.xml, ./coverage/coverage-final.json
 

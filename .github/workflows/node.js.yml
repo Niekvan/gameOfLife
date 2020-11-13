@@ -27,4 +27,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: yarn install
     - run: yarn build
-    - run: yarn test
+    - name: Test code
+      run: yarn test
+    - name: Codecov
+      uses: codecov/codecov-action@v1.0.14
+      with: 
+        files: ./coverage/clover.xml, ./coverage/coverage-final.json
+

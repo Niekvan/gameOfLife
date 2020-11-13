@@ -27,4 +27,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: yarn install
     - run: yarn build
+    
+    - name: Test code
     - run: yarn test
+      
+    - name: Upload code coverage
+      uses: codecov/codecov-action@v1.0.14
+      with: 
+        file: ./covergae.xml
+        directory: ./coverage/
+

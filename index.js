@@ -1,67 +1,58 @@
 const { GameOfLife } = window.GameOfLife;
 const game = new GameOfLife({ rows: 100, columns: 100 });
-const seed = [
-  {
-    row: 1,
-    column: 0,
-  },
-  {
-    row: 1,
-    column: 1,
-  },
-  {
-    row: 1,
-    column: 2,
-  },
-];
-game.seed(seed);
-game.sequence();
 
-const startButton = document.querySelector('#start');
-const stopButton = document.querySelector('#stop');
-const randomButton = document.querySelector('#random');
-const emptyButton = document.querySelector('#empty');
+fetch('./seed.json')
+  .then((data) => data.json())
+  .then((seed) => {
+    game.seed(seed);
+    game.sequence();
 
-const canvas = document.querySelector('#canvas');
-const ctx = canvas.getContext('2d');
+    const startButton = document.querySelector('#start');
+    const stopButton = document.querySelector('#stop');
+    const randomButton = document.querySelector('#random');
+    const emptyButton = document.querySelector('#empty');
 
-const size = Math.min(window.innerWidth, window.innerHeight);
-canvas.width = size;
-canvas.height = size;
+    const canvas = document.querySelector('#canvas');
+    const ctx = canvas.getContext('2d');
 
-const cellSize = Math.floor(size / game.state.columns);
+    const size = Math.min(window.innerWidth, window.innerHeight);
+    canvas.width = size;
+    canvas.height = size;
 
-const fillCanvas = (cells) => {
-  for (const cell of cells) {
-    const color = cell.alive ? '#FF7586' : '#181818';
-    ctx.fillStyle = color;
-    ctx.fillRect(
-      cell.column * cellSize,
-      cell.row * cellSize,
-      cellSize,
-      cellSize
-    );
-  }
-};
+    const cellSize = Math.floor(size / game.state.columns);
 
-fillCanvas(game.state.cells);
+    const fillCanvas = (cells) => {
+      for (const cell of cells) {
+        const color = cell.alive ? '#FF7586' : '#181818';
+        ctx.fillStyle = color;
+        ctx.fillRect(
+          cell.column * cellSize,
+          cell.row * cellSize,
+          cellSize,
+          cellSize
+        );
+      }
+    };
 
-let cancel;
-const loop = () => {
-  game.sequence();
-  fillCanvas(game.state.cells);
-  cancel = requestAnimationFrame(loop);
-};
+    fillCanvas(game.state.cells);
 
-startButton.addEventListener('click', () => loop());
-stopButton.addEventListener('click', () => cancelAnimationFrame(cancel));
-randomButton.addEventListener('click', () => {
-  cancelAnimationFrame(cancel);
-  game.randomise();
-  fillCanvas(game.state.cells);
-});
-emptyButton.addEventListener('click', () => {
-  cancelAnimationFrame(cancel);
-  game.reset();
-  fillCanvas(game.state.cells);
-});
+    let cancel;
+    const loop = () => {
+      game.sequence();
+      fillCanvas(game.state.cells);
+      cancel = requestAnimationFrame(loop);
+    };
+
+    startButton.addEventListener('click', () => loop());
+    stopButton.addEventListener('click', () => cancelAnimationFrame(cancel));
+    randomButton.addEventListener('click', () => {
+      cancelAnimationFrame(cancel);
+      game.randomise();
+      fillCanvas(game.state.cells);
+    });
+    emptyButton.addEventListener('click', () => {
+      cancelAnimationFrame(cancel);
+      game.reset();
+      fillCanvas(game.state.cells);
+    });
+  });

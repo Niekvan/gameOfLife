@@ -25,7 +25,7 @@ export class GameOfLife {
   public toggleCellAlive(selection: Selection): void {
     const newGrid = copyWithoutReference(this.grid);
     const index = this._selectionToIndex(selection);
-    const cell = copyWithoutReference(this.grid.cells[index]);
+    const cell = newGrid.cells[index];
 
     const alive = cell.alive;
 
@@ -50,7 +50,7 @@ export class GameOfLife {
     const newGrid = this._createGrid(this.rows, this.columns);
     const length = newGrid.cells.length;
     const aliveCells: AliveMap = {};
-    this.reset();
+
     for (let i = 0; i < length; i++) {
       const cell = newGrid.cells[i];
       const alive = Math.random() > 0.75 ? true : false;
@@ -61,6 +61,7 @@ export class GameOfLife {
         aliveCells[i] = newCell;
       }
     }
+
     this.grid = newGrid;
     this.alivePopulation = aliveCells;
   }
@@ -148,40 +149,58 @@ export class GameOfLife {
     };
   }
 
+  /**
+   * Get the neighbouring cells from the grid.
+   * This function checks if the cell at the specified index is indeed a neighnour of the given cell.
+   * Due to the 1D array design the next cell in the array, might be on a different row
+   * @param cell
+   * @param grid
+   */
   private _getNeighbours(cell: Cell, grid: Grid): Cell[] {
+    // Get the indexes of the neighbouring cells
+    const leftTopNeighbourIndex = cell.index - grid.columns - 1;
+    const topNeighbourIndex = cell.index - grid.columns;
+    const rightTopNeighbourIndex = cell.index - grid.columns + 1;
+    const leftNeighbourIndex = cell.index - 1;
+    const rightNeighbourIndex = cell.index + 1;
+    const leftBottomNeighbourIndex = cell.index + grid.columns - 1;
+    const bottomNeighbourIndex = cell.index + grid.columns;
+    const rightBottomNeighbourIndex = cell.index + grid.columns + 1;
+
+    // Set the surrounding columns and rows
+    const column = cell.column;
+    const leftColumn = column - 1;
+    const rightColumn = column + 1;
+    const row = cell.row;
+    const topRow = row - 1;
+    const bottomRow = row + 1;
+
+    // Get neighbour cell if it is in the correct row and column
     const leftTopNeighbour =
-      grid.cells[cell.index - grid.columns - 1]?.row === cell.row - 1
-        ? grid.cells[cell.index - grid.columns - 1]
+      topRow >= 0 && leftColumn >= 0
+        ? grid.cells[leftTopNeighbourIndex]
         : undefined;
     const topNeighbour =
-      grid.cells[cell.index - grid.columns]?.row === cell.row - 1
-        ? grid.cells[cell.index - grid.columns]
-        : undefined;
+      topRow >= 0 ? grid.cells[topNeighbourIndex] : undefined;
     const rightTopNeighbour =
-      grid.cells[cell.index - grid.columns + 1]?.row === cell.row - 1
-        ? grid.cells[cell.index - grid.columns + 1]
+      topRow >= 0 && rightColumn < this.columns
+        ? grid.cells[rightTopNeighbourIndex]
         : undefined;
 
     const leftNeighbour =
-      grid.cells[cell.index - 1]?.row === cell.row
-        ? grid.cells[cell.index - 1]
-        : undefined;
+      leftColumn >= 0 ? grid.cells[leftNeighbourIndex] : undefined;
     const rightNeighbour =
-      grid.cells[cell.index + 1]?.row === cell.row
-        ? grid.cells[cell.index + 1]
-        : undefined;
+      rightColumn < this.columns ? grid.cells[rightNeighbourIndex] : undefined;
 
     const leftBottomNeighbour =
-      grid.cells[cell.index + grid.columns - 1]?.row === cell.row + 1
-        ? grid.cells[cell.index + grid.columns - 1]
+      bottomRow < this.rows && leftColumn >= 0
+        ? grid.cells[leftBottomNeighbourIndex]
         : undefined;
     const bottomNeighbour =
-      grid.cells[cell.index + grid.columns]?.row === cell.row + 1
-        ? grid.cells[cell.index + grid.columns]
-        : undefined;
+      bottomRow < this.rows ? grid.cells[bottomNeighbourIndex] : undefined;
     const rightBottomNeighbour =
-      grid.cells[cell.index + grid.columns + 1]?.row === cell.row + 1
-        ? grid.cells[cell.index + grid.columns + 1]
+      bottomRow < this.rows && rightColumn < this.columns
+        ? grid.cells[rightBottomNeighbourIndex]
         : undefined;
 
     return [

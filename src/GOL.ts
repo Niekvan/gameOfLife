@@ -22,7 +22,7 @@ export class GameOfLife {
     return this.frame;
   }
 
-  public toggleCellAlive(selection: Selection): void {
+  public toggleCellAlive(selection: Selection): Grid {
     const newGrid = copyWithoutReference(this.grid);
     const index = this._selectionToIndex(selection);
     const cell = newGrid.cells[index];
@@ -39,14 +39,17 @@ export class GameOfLife {
 
     newGrid.cells[index] = cell;
     this.grid = newGrid;
+    return newGrid;
   }
 
-  public reset(): void {
-    this.grid = this._createGrid(this.rows, this.columns);
+  public reset(): Grid {
+    const newGrid = this._createGrid(this.rows, this.columns);
     this.alivePopulation = {};
+    this.grid = newGrid;
+    return newGrid;
   }
 
-  public randomise(): void {
+  public randomise(): Grid {
     const newGrid = this._createGrid(this.rows, this.columns);
     const length = newGrid.cells.length;
     const aliveCells: AliveMap = {};
@@ -64,9 +67,10 @@ export class GameOfLife {
 
     this.grid = newGrid;
     this.alivePopulation = aliveCells;
+    return newGrid;
   }
 
-  public seed(seed: Selection[]): void {
+  public seed(seed: Selection[]): Grid {
     const grid = this._createGrid(this.rows, this.columns);
     const aliveCells: AliveMap = {};
 
@@ -80,15 +84,16 @@ export class GameOfLife {
 
     this.grid = grid;
     this.alivePopulation = aliveCells;
+    return grid;
   }
 
-  public resize(data: { rows: number; columns: number }): void {
+  public resize(data: { rows: number; columns: number }): Grid {
     this.rows = data.rows;
     this.columns = data.columns;
-    this.reset();
+    return this.reset();
   }
 
-  public sequence(): void {
+  public sequence(): Grid {
     const newGrid = this._createGrid(this.rows, this.columns);
 
     const aliveKeys: number[] = Object.keys(this.alivePopulation).map(Number);
@@ -125,6 +130,7 @@ export class GameOfLife {
     this.frame++;
     this.grid = newGrid;
     this.alivePopulation = aliveCells;
+    return newGrid;
   }
 
   private _createGrid(rows: number, columns: number): Grid {

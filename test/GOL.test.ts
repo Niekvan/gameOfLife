@@ -20,6 +20,7 @@ describe('Testing Game of Life', () => {
       columns,
       cells,
     };
+
     expect(game.state).toStrictEqual(expected);
   });
 
@@ -55,15 +56,15 @@ describe('Testing Game of Life', () => {
 
     const game = new GameOfLife({ rows: 5, columns: 5 });
 
-    game.toggleCellAlive(selected);
+    const aliveGrid = game.toggleCellAlive(selected);
 
     expect(game['alivePopulation'][index]).toEqual(expectedAlive);
-    expect(game.state.cells[index]).toEqual(expectedAlive);
+    expect(aliveGrid.cells[index]).toEqual(expectedAlive);
 
-    game.toggleCellAlive(selected);
+    const deathGrid = game.toggleCellAlive(selected);
 
     expect(game['alivePopulation'][index]).toEqual(undefined);
-    expect(game.state.cells[index]).toEqual(expectedDead);
+    expect(deathGrid.cells[index]).toEqual(expectedDead);
   });
 
   it('Should randomly set cells alive', () => {
@@ -72,11 +73,9 @@ describe('Testing Game of Life', () => {
     const initialState = copyWithoutReference(game.state);
     const initialAlive = game['alivePopulation'];
 
-    game.randomise();
+    const grid = game.randomise();
 
-    const randomState = copyWithoutReference(game.state);
-
-    expect(initialState).not.toStrictEqual(randomState);
+    expect(initialState).not.toStrictEqual(grid);
     expect(initialAlive).not.toStrictEqual(game['alivePopulation']);
   });
 
@@ -107,10 +106,10 @@ describe('Testing Game of Life', () => {
   it('Should resize the game', () => {
     const game = new GameOfLife({ rows: 5, columns: 5 });
 
-    game.resize({ rows: 10, columns: 20 });
+    const grid = game.resize({ rows: 10, columns: 20 });
 
-    expect(game.state.rows).toBe(10);
-    expect(game.state.columns).toBe(20);
+    expect(grid.rows).toBe(10);
+    expect(grid.columns).toBe(20);
   });
 
   it('Should set the seed', () => {
@@ -155,9 +154,9 @@ describe('Testing Game of Life', () => {
       },
     };
 
-    game.seed(seed);
+    const grid = game.seed(seed);
 
-    const aliveCells = game.state.cells.filter((cell) => cell.alive);
+    const aliveCells = grid.cells.filter((cell) => cell.alive);
 
     expect(game['alivePopulation']).toStrictEqual(expected);
     expect(aliveCells).toStrictEqual(Object.values(expected));
@@ -247,8 +246,8 @@ describe('Testing Game of Life', () => {
     ];
 
     game.seed(seed);
-    game.sequence();
+    const sequence = game.sequence();
 
-    expect(game.state.cells).toStrictEqual(expected);
+    expect(sequence.cells).toStrictEqual(expected);
   });
 });
